@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hoops</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=shopping_cart" />
     <link rel="stylesheet" href="./css/style.css" />
     <script type="module" src="./js/app.js"></script>
   </head>
   <body>
-    <a class="pular-conteudo" href="#cardapio">Ir para o cardápio</a>
 
     <section class="promocao">
       <p>Frete grátis acima de R$ 199</p>
@@ -39,10 +39,14 @@
 
 
           <div class="acoes-header">
-            <a id="link-carrinho" class="btn btn-destaque" href="#carrinho" aria-label="Carrinho, 0 itens">
-              <span aria-hidden="true">🛒</span>
+            <a id="link-carrinho" class="btn" href="#carrinho" aria-label="Carrinho, 0 itens">
+              <span class="material-symbols-outlined">
+                shopping_cart
+                </span>
               <span id="contador-carrinho" class="contador" aria-hidden="true">0</span>
             </a>
+            <input type="text" placeholder="Buscar produtos..." class="busca">
+            <button class="btn btn-dark-theme"><img src="media/lua-crescente.png" alt="Botão de Lua"></button>
             <button id="menu-toggle" class="menu-toggle" type="button" aria-controls="menu-principal" aria-expanded="false" aria-label="Abrir menu">
               <span aria-hidden="true">☰</span>
             </button>

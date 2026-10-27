@@ -4,8 +4,6 @@ import { Carrinho } from "./Carrinho.js";
 import { Pedido } from "./Pedido.js";
 import { Repository } from "./Repository.js";
 
-console.log("Teste")
-
 // ===== Estado da aplicação (objetos das classes) =====
 
 const CATEGORIAS = ["Regata", "Tênis", "Bola", "Acessório"];
@@ -176,64 +174,6 @@ function criarLinhaCarrinho(item) {
   );
 }
 
-function renderizarAdmin() {
-  const linhas = repository.listarProdutos().map(produto => {
-    const nome = produto.getNome();
-    return criar("li", { classe: "item-admin" },
-      criarImagem(produto),
-      criar("div", { classe: "item-info" },
-        criar("h3", { texto: nome }),
-        criar("p", { texto: `${produto.getCategoria()} · ${moeda(produto.getPreco())}` })
-      ),
-      criar("div", { classe: "acoes-item" },
-        criar("button", {
-          classe: "btn btn-secundario", type: "button", "data-acao": "editar", "data-id": produto.getId(),
-          "aria-label": `Editar ${nome}`, texto: "Editar"
-        }),
-        criar("button", {
-          classe: "btn btn-perigo", type: "button", "data-acao": "excluir", "data-id": produto.getId(),
-          "aria-label": `Excluir ${nome}`, texto: "Excluir"
-        })
-      )
-    );
-  });
-  $("lista-admin").replaceChildren(...linhas);
-}
-
-function renderizarPedidos() {
-  const pedidos = repository.listarPedidos().reverse(); // mais recentes primeiro
-  $("lista-pedidos").replaceChildren(...pedidos.map(criarCardPedido));
-  $("pedidos-vazio").hidden = pedidos.length > 0;
-}
-
-function criarCardPedido(pedido) {
-  const itens = pedido.getItens();
-  const subtotal = itens.reduce((soma, item) => soma + item.getQuantidade() * item.getProduto().getPreco(), 0);
-  const taxa = pedido.getTotal() - subtotal;
-  const idSelect = `status-pedido-${pedido.getId()}`;
-
-  const select = criar("select", { id: idSelect, "data-pedido": pedido.getId() },
-    ...STATUS_PEDIDO.map(status => criar("option", { value: status, texto: status }))
-  );
-  select.value = pedido.getStatus();
-
-  return criar("article", { classe: "pedido" },
-    criar("h3", { texto: `Pedido #${pedido.getId()}` }),
-    criar("p", { texto: pedido.getData().toLocaleString("pt-BR") }),
-    criar("p", { texto: `Cliente: ${pedido.getCliente()}` }),
-    criar("p", { texto: `Tipo de entrega: ${pedido.getTipoEntrega()}` }),
-    criar("p", { texto: `Endereço: ${pedido.getEndereco() || "—"}` }),
-    criar("p", { texto: `Pagamento: ${pedido.getFormaPgto()}` }),
-    criar("ul", {}, ...itens.map(item => criar("li", {
-      texto: `${item.getQuantidade()}x ${item.getProduto().getNome()} (${moeda(item.getQuantidade() * item.getProduto().getPreco())})`
-    }))),
-    criar("p", { texto: `Taxa de entrega: ${moeda(taxa)}` }),
-    criar("p", { classe: "pedido-total", texto: `Total: ${moeda(pedido.getTotal())}` }),
-    criar("label", { for: idSelect, texto: "Status do pedido" }),
-    select
-  );
-}
-
 // ===== Ações do carrinho =====
 
 function adicionarAoCarrinho(id) {
@@ -286,54 +226,6 @@ function limparCarrinho() {
   mostrarToast("Carrinho limpo.");
 }
 
-// ===== Administração de produtos (CREATE / UPDATE / DELETE) =====
-
-function lerFormularioProduto() {
-  return {
-    nome: $("campo-nome").value.trim(),
-    descricao: $("campo-descricao").value.trim(),
-    preco: parseFloat($("campo-preco").value),
-    categoria: $("campo-categoria").value,
-    imagem: $("campo-imagem").value.trim()
-  };
-}
-
-function validarProduto(dados) {
-  const erros = [];
-  if (dados.nome.length < 3) erros.push("Informe o nome do produto (mínimo 3 caracteres).");
-  if (dados.descricao.length < 5) erros.push("Informe uma descrição (mínimo 5 caracteres).");
-  if (!(dados.preco > 0)) erros.push("Informe um preço maior que zero.");
-  if (!CATEGORIAS.includes(dados.categoria)) erros.push("Escolha uma categoria.");
-  return erros;
-}
-
-function salvarProduto(evento) {
-  evento.preventDefault();
-
-  const dados = lerFormularioProduto();
-  const erros = validarProduto(dados);
-  mostrarErros($("erros-produto"), erros);
-  if (erros.length > 0) return;
-
-  if (produtoEmEdicao) {
-    // UPDATE: altera o objeto e depois atualiza o Repository
-    produtoEmEdicao.setNome(dados.nome);
-    produtoEmEdicao.setDescricao(dados.descricao);
-    produtoEmEdicao.setPreco(dados.preco);
-    produtoEmEdicao.setCategoria(dados.categoria);
-    produtoEmEdicao.setImagem(dados.imagem);
-    repository.atualizarProduto(produtoEmEdicao);
-    mostrarToast(`${dados.nome} atualizado com sucesso.`);
-    sairDaEdicao();
-  } else {
-    // CREATE: cria o Produto e adiciona no Repository
-    repository.adicionarProduto(new Produto(dados.nome, dados.descricao, dados.preco, dados.imagem, dados.categoria));
-    mostrarToast(`${dados.nome} cadastrado no cardápio.`);
-    $("form-produto").reset();
-  }
-
-  renderizarTudo();
-}
 
 function iniciarEdicao(id) {
   const produto = repository.buscarProduto(id);
@@ -492,7 +384,7 @@ function iniciar() {
 
 iniciar();
 
-const btncarrinho = document.getElementsByClassName('acoes-header')[0]
+const btncarrinho = document.getElementById('link-carrinho')
 const sectionCarrinho = document.getElementById('carrinho')
 const btn_voltar_carrinho  = document.getElementById('voltar-carrinho')
 
@@ -502,4 +394,14 @@ btncarrinho.addEventListener('click', () => {
 
 btn_voltar_carrinho.addEventListener('click', () => {
   sectionCarrinho.style.display = "none"
+})
+
+const btnLimparCarrinho = document.getElementById('btn-limpar')
+btnLimparCarrinho.addEventListener('click' , () => {
+  carrinho.limpar();
+  renderizarCarrinho();
+})
+
+$('btn-finalizar').addEventListener('click', (e) => {
+  finalizarPedido(e)
 })
